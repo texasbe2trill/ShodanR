@@ -55,7 +55,7 @@ api_url <- "https://api.shodan.io/shodan/host/search"
 # Parameters to query
 params <- list(
   key = api_key,
-  query = "has_screenshot:true encrypted attention" # ransomware related query
+  query = "has_screenshot:true encrypted" # ransomware related query
 )
 
 # Send a GET request to Shodan
