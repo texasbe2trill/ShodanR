@@ -1,0 +1,183 @@
+---
+title: "Parsing Data from Shodan API in R"
+author: "Chris Campbell"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: '3'
+    number_sections: true
+  pdf_document:
+    toc: true
+    toc_depth: '3'
+  word_document:
+    toc: true
+    toc_depth: '3'
+always_allow_html: true
+---
+
+# Introduction
+
+This R Markdown file explores data regarding internet-connected devices with via the Shodan API.
+
+## Dependencies
+
+-   **R version**: `r R.version.string`
+-   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr`, `jsonlite`, 
+`stringr`, `ggthemes`, `renv`, `plotly`,  `htmltools`
+
+```{r setup, message=F, echo=T, results='hide'}
+#Load required libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(httr)
+library(jsonlite)
+library(stringr)
+library(ggthemes)
+library(renv)
+library(plotly)
+library(htmltools)
+```
+
+# Input
+
+-   **Shodan API Base URL**:(https://api.shodan.io)
+
+# Analysis of Ransomware Infections
+
+```{r}
+# Shodan api key and endpoint
+api_key <- Sys.getenv("SHODAN_API_KEY") # Enter your API key here
+api_url <- "https://api.shodan.io/shodan/host/search"
+
+# Parameters to query
+params <- list(
+  key = api_key,
+  query = "has_screenshot:true encrypted attention" # ransomware related query
+)
+
+# Send a GET request to Shodan
+response <- GET(api_url, query = params)
+
+# Return the error message if the status code is not 200
+if (response$status_code != 200) {
+  stop(content(response, "text", encoding = "UTF-8"))
+}
+
+# Parse the JSON response
+shodan_data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+
+# Create the dataframe
+shodan_df <- as.data.frame(shodan_data$matches)
+
+# Select interesting columns
+shodan_df_ransomware <- shodan_df %>%
+  select(ip_str, port, transport, product, os, location, screenshot)
+# Unnest nested columns
+shodan_df_ransomware <- shodan_df_ransomware %>%
+  unnest(`screenshot`) %>%
+  unnest(`location`)
+
+# Show Column names
+colnames(shodan_df_ransomware)
+
+# Select interesting columns from unnested dataframe
+shodan_df_ransomware <- shodan_df_ransomware %>%
+  select(ip_str, port, transport, product,os, country_name, country_code, city, 
+         longitude, latitude, text)
+
+# Rename the columns
+colnames(shodan_df_ransomware) <- c("IP Address", "Port", "Transport", "Service", 
+                                    "Operating System", "Country", "Country Code",
+                                    "City", "Longitude", "Latitude","Ransom Letter")
+
+# Group by Country Code
+shodan_df_ransomware <- shodan_df_ransomware %>%
+  group_by(`Country Code`) %>%
+  # Arrange by Country
+  arrange(Country)
+
+# Create a frequency table with the counts
+common_country_count <- table(shodan_df_ransomware$Country)
+common_country_count <- sort(common_country_count, decreasing = TRUE) # Sort the count in descending order
+common_country_count # Display the count
+
+# Count the number of times values in Country appear
+shodan_df_ransomware_count <- shodan_df_ransomware %>%
+  count(Country)
+
+# Convert into a factor
+shodan_df_ransomware_count$`Country Code` <- 
+  factor(shodan_df_ransomware_count$`Country Code`,
+         levels = shodan_df_ransomware_count$`Country Code`)
+
+# Get the names of the counts
+common_country_names <- names(common_country_count)
+
+# Get the most common country
+most_common_country <- common_country_names[common_country_count == max(common_country_count)]
+# Collapse the most common country into a single string
+most_common_country <- paste(most_common_country, collapse = ", ")
+
+# Output the most common country
+cat("Per the Shodan dataset,", most_common_country, 
+    "is the country with the most ransomware infections.", 
+    "\n")
+# Display the total number of ransomware infections
+cat("The total number of ransomware infections is", nrow(shodan_df_ransomware), 
+    "\n")
+
+```
+
+# Data Visualization of Ransomware Infections
+
+```{r}
+# Create a world map of ransomware infections
+ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
+  borders("world", colour = "gray50", fill = "gray50") +
+  # Remove Antarctica
+  coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
+  geom_point() +
+  theme_map() +
+  labs(title = "Ransomware Infections by Country and City",
+       caption = "Source: Shodan API",
+       x = "Longitude",
+       y = "Latitude",
+       color = "Country Code") +
+  theme_fivethirtyeight() +
+  # Remove the gridlines and axis labels
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none", # Removes the fill legend
+        plot.title = element_text(hjust = 0.5)) # Center the title
+
+# Make the map interactive
+p <- ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
+  borders("world", colour = "gray50", fill = "gray50") +
+  geom_point() +
+  theme_map() +
+  labs(title = "Ransomware Infections by Country and City",
+       caption = "Source: Shodan API",
+       x = "Longitude",
+       y = "Latitude",
+       color = "Country Code") +
+  theme_fivethirtyeight() +
+  # Remove the gridlines and axis labels
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "none", # Removes the fill legend
+        plot.title = element_text(hjust = 0.5)) # Center the title
+
+ggplotly(p)
+```
