@@ -12,13 +12,14 @@ This project analyzes ransomware infections using data retrieved from the **Shod
 
 ## Setup Instructions
 
-### 1. Install Required Packages
+### 1. Install `renv` (if not already installed)
 
-Ensure you have the necessary R packages installed:
+Before activating the lock file, ensure you have the `renv` package installed:
 
 ``` r
-install.packages(c("ggplot2", "plotly", "dplyr", "httr", "jsonlite", "ggthemes",
-"renv", "tidyr", "htmltools", "maps"))
+install.packages("renv")
+library(renv) # Loads the renv package
+renv::restore() # Install exact packages used during development
 ```
 
 ### 2. Store API Key Securely
