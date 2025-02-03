@@ -123,8 +123,8 @@ most_common_country <- paste(most_common_country, collapse = ", ")
 
 # Output the most common country
 cat("Per the Shodan dataset,", most_common_country,
-    "is the country with the most ransomware infections,", 
-    "with", max(common_country_count),"infections.", "\n")
+    "is the country with the most ransomware infections.", "\n",
+    "There are", max(common_country_count),"infections currently.", "\n")
 # Display the total number of ransomware infections
 cat("The total number of ransomware infections:", nrow(shodan_df_ransomware), 
     "\n")
