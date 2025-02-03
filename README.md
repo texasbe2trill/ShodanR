@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # ShodanR
 
 ## Overview
@@ -29,7 +23,7 @@ Ensure you have the necessary R packages installed:
 
 ``` r
 install.packages(c("ggplot2", "plotly", "dplyr", "httr", "jsonlite", "ggthemes",
-"renv", "tidyr"))
+"renv", "tidyr", "htmltools", "maps"))
 ```
 
 ### 2. Store API Key Securely

@@ -24,7 +24,7 @@ This R Markdown file explores data regarding internet-connected devices with via
 
 -   **R version**: `r R.version.string`
 -   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr`, `jsonlite`, 
-`stringr`, `ggthemes`, `renv`, `plotly`,  `htmltools`
+`stringr`, `ggthemes`, `renv`, `plotly`, `htmltools`, `maps`
 
 ```{r setup, message=F, echo=T, results='hide'}
 #Load required libraries
@@ -38,6 +38,7 @@ library(ggthemes)
 library(renv)
 library(plotly)
 library(htmltools)
+library(maps)
 ```
 
 # Input
