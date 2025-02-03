@@ -133,6 +133,8 @@ cat("The total number of ransomware infections is", nrow(shodan_df_ransomware),
 
 # Data Visualization of Ransomware Infections
 
+## Ransomware Infections by Country and City (ggplot2)
+
 ```{r}
 # Create a world map of ransomware infections
 ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
@@ -157,7 +159,11 @@ ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
         axis.title.y = element_blank(),
         legend.position = "none", # Removes the fill legend
         plot.title = element_text(hjust = 0.5)) # Center the title
+```
 
+## Interactive Ransomware Infections Map (plotly)
+
+```{r}
 # Make the map interactive
 p <- ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
   borders("world", colour = "gray50", fill = "gray50") +
