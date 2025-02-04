@@ -45,7 +45,7 @@ library(maps)
 
 -   **Shodan API Base URL**:(https://api.shodan.io)
 
-# Analysis of Ransomware Infections
+## Query Data from Shodan API
 
 ```{r}
 # Shodan api key and endpoint
@@ -58,22 +58,62 @@ params <- list(
   query = "has_screenshot:true encrypted" # ransomware related query
 )
 
-# Send a GET request to Shodan
-response <- GET(api_url, query = params)
+```
 
-# Return the error message if the status code is not 200
-if (response$status_code != 200) {
-  stop(content(response, "text", encoding = "UTF-8"))
+# Retrieve Data from Shodan API
+
+```{r message=F, echo=T, results='hide'}
+# Retrieve up to 20 pages of the Shodan dataset
+page <- 1  # Start with the first page
+max_pages <- 20  # Set the new page limit to 20
+
+# Begin the loop to retrieve the data
+repeat {
+  params$page <- page  # Set the page number
+
+  # Print the page number
+  cat("Retrieving page", page, "of the Shodan dataset...\n")
+  flush.console()  # Ensures immediate output
+
+  # Send the GET request
+  response <- GET(api_url, query = params)
+
+  # Return the error message if the status code is not 200
+  if (response$status_code != 200) {
+    stop(content(response, "text", encoding = "UTF-8"))
+  }
+
+  # Parse the JSON response
+  shodan_data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+
+  # Create the dataframe
+  shodan_df <- as.data.frame(shodan_data$matches)
+  
+  # Append the data from the current page to the existing dataframe
+  if (page == 1) {
+    shodan_df_all <- shodan_df
+  } else {
+    shodan_df_all <- bind_rows(shodan_df_all, shodan_df)
+  }
+
+  Sys.sleep(1)  # Sleep for 1 second to avoid rate limiting by Shodan
+  
+  # Stop after retrieving 20 pages  
+  if (page >= max_pages) {
+    message("Reached the maximum of 20 pages. Stopping.")
+    break
+  }
+
+  page <- page + 1  # Increment the page number
 }
 
-# Parse the JSON response
-shodan_data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+```
 
-# Create the dataframe
-shodan_df <- as.data.frame(shodan_data$matches)
+# Tidy Data
 
+```{r}
 # Select interesting columns
-shodan_df_ransomware <- shodan_df %>%
+shodan_df_ransomware <- shodan_df_all %>%
   select(ip_str, port, transport, product, os, location, screenshot)
 # Unnest nested columns
 shodan_df_ransomware <- shodan_df_ransomware %>%
@@ -99,10 +139,15 @@ shodan_df_ransomware <- shodan_df_ransomware %>%
   # Arrange by Country
   arrange(Country)
 
+
+```
+
+# Data Analysis of Ransomware Infections
+
+```{r}
 # Create a frequency table with the counts
 common_country_count <- table(shodan_df_ransomware$Country)
 common_country_count <- sort(common_country_count, decreasing = TRUE) # Sort the count in descending order
-common_country_count # Display the count
 
 # Count the number of times values in Country appear
 shodan_df_ransomware_count <- shodan_df_ransomware %>%
@@ -121,10 +166,12 @@ most_common_country <- common_country_names[common_country_count == max(common_c
 # Collapse the most common country into a single string
 most_common_country <- paste(most_common_country, collapse = ", ")
 
+
 # Output the most common country
 cat("Per the Shodan dataset,", most_common_country,
     "is the country with the most ransomware infections.", "\n",
     "There are", max(common_country_count),"infections currently.", "\n")
+
 # Display the total number of ransomware infections
 cat("The total number of ransomware infections:", nrow(shodan_df_ransomware), 
     "\n")
