@@ -111,7 +111,7 @@ repeat {
 
 # Tidy Data
 
-```{r}
+```{r , message=F, echo=T, results='hide'}
 # Select interesting columns
 shodan_df_ransomware <- shodan_df_all %>%
   select(ip_str, port, transport, product, os, location, screenshot)
