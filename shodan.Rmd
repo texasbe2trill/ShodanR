@@ -62,10 +62,8 @@ params <- list(
 
 # Retrieve Data from Shodan API
 
-```{r message=F, echo=T, results='hide'}
-# Retrieve up to 20 pages of the Shodan dataset
+```{r}
 page <- 1  # Start with the first page
-max_pages <- 20  # Set the new page limit to 20
 
 # Begin the loop to retrieve the data
 repeat {
@@ -85,6 +83,7 @@ repeat {
 
   # Parse the JSON response
   shodan_data <- fromJSON(content(response, "text", encoding = "UTF-8"))
+  max_pages <- ceiling(shodan_data$total / 100)  # Calculate the maximum number of pages)
 
   # Create the dataframe
   shodan_df <- as.data.frame(shodan_data$matches)
@@ -96,11 +95,11 @@ repeat {
     shodan_df_all <- bind_rows(shodan_df_all, shodan_df)
   }
 
-  Sys.sleep(1)  # Sleep for 1 second to avoid rate limiting by Shodan
+  Sys.sleep(1)  # Sleep for 1 second to avoid rate limitinginde
   
-  # Stop after retrieving 20 pages  
+  # Stop after retrieving the maximum number of pages  
   if (page >= max_pages) {
-    message("Reached the maximum of 20 pages. Stopping.")
+    message("Reached the maximum number of pages. Stopping.")
     break
   }
 
