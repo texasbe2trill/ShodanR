@@ -149,13 +149,10 @@ common_country_count <- table(shodan_df_ransomware$Country)
 common_country_count <- sort(common_country_count, decreasing = TRUE) # Sort the count in descending order
 
 # Count the number of times values in Country appear
-shodan_df_ransomware_count <- shodan_df_ransomware %>%
+shodan_count <- shodan_df_ransomware %>%
+  group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
   count(Country)
 
-# Convert into a factor
-shodan_df_ransomware_count$`Country Code` <- 
-  factor(shodan_df_ransomware_count$`Country Code`,
-         levels = shodan_df_ransomware_count$`Country Code`)
 
 # Get the names of the counts
 common_country_names <- names(common_country_count)
@@ -194,7 +191,8 @@ if (most_common_country == "United States") {
 
 ```{r}
 # Create a world map of ransomware infections
-ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
+ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
+                                 size = n)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
@@ -222,7 +220,8 @@ ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
 
 ```{r}
 # Make the map interactive
-p <- ggplot(shodan_df_ransomware, aes(x = Longitude, y = Latitude, color = `City`)) +
+p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
+                                      size = n)) +
   borders("world", colour = "gray50", fill = "gray50") +
   geom_point() +
   theme_map() +
