@@ -34,6 +34,28 @@ Add your **Shodan API key** to the `.Renviron` file to avoid exposing it in your
 
 4\. Access it securely in R: `api_key <- Sys.getenv("SHODAN_API_KEY")`
 
+## Data
+
+### Ransomware Data
+
+`shodan_ransomware.csv` contains data on ransomware-infected devices retrieved from the Shodan API.
+
+### Data Dictionary
+
+| Column Name          | Description                                   |
+|----------------------|-----------------------------------------------|
+| **IP Address**       | The IP address of the device.                 |
+| **Port**             | The port number being used.                   |
+| **Transport**        | The transport protocol used (e.g., TCP, UDP). |
+| **Service**          | The name of the service running on the port.  |
+| **Operating System** | The operating system running on the device.   |
+| **Country**          | The country where the device is located.      |
+| **Country Code**     | The ISO 3166 country code.                    |
+| **City**             | The city where the device is located.         |
+| **Longitude**        | The geographic longitude of the device.       |
+| **Latitude**         | The geographic latitude of the device.        |
+| **Ransom Letter**    | The ransom letter found in the data.          |
+
 ## Future Improvements
 
 -   [ ] Automate periodic data fetching for time-series analysis.

@@ -142,6 +142,8 @@ shodan_df_ransomware <- shodan_df_ransomware %>%
   # Arrange by Country
   arrange(Country)
 
+# Write the data to a CSV file
+write.csv(shodan_df_ransomware, "shodan_ransomware.csv", row.names = FALSE)
 
 ```
 
@@ -226,10 +228,10 @@ kable(common_country_count, caption = "Ransomware Infections by Country",
 
 ## Ransomware Infections by Country and City (ggplot2)
 
-```{r}
+```{r, fig.width=10, fig.height=6, fig.retina= 2}
 # Create a world map of ransomware infections
-ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
-                                 size = n)) +
+ggplot(shodan_count, aes(x = Longitude, y = Latitude, 
+                         color = `Country Code`, size = n)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
@@ -255,11 +257,17 @@ ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
 
 ## Interactive Ransomware Infections Map (plotly)
 
-```{r}
+```{r, fig.width=10, fig.height=6, fig.retina= 2}
 # Make the map interactive
-p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
-                                      size = n)) +
+p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, 
+                         color = `Country Code`, size = n,
+                         # Text input for tooltip
+                         text = paste(" City:", `City`, "<br>", 
+                                      "Country:", `Country`,"<br>",
+                                      "Number of Infections:", n))) +
   borders("world", colour = "gray50", fill = "gray50") +
+  # Remove Antarctica
+  #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
   labs(title = "Ransomware Infections by Country and City",
@@ -279,5 +287,8 @@ p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
         legend.position = "none", # Removes the fill legend
         plot.title = element_text(hjust = 0.5)) # Center the title
 
-ggplotly(p)
+ggplotly(p, tooltip = "text") %>%
+  layout(hoverlabel = list(
+    align = "left"
+  ))
 ```
