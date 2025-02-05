@@ -137,6 +137,7 @@ colnames(shodan_df_ransomware) <- c("IP Address", "Port", "Transport", "Service"
 
 # Group by Country Code
 shodan_df_ransomware <- shodan_df_ransomware %>%
+  filter(!is.na(`Ransom Letter`)) %>% # Only keep rows with ransom letters
   group_by(`Country Code`) %>%
   # Arrange by Country
   arrange(Country)
@@ -231,7 +232,7 @@ ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `City`,
                                  size = n)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
-  coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
+  #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
   labs(title = "Ransomware Infections by Country and City",
