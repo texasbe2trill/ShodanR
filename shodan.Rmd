@@ -24,7 +24,8 @@ This R Markdown file explores data regarding internet-connected devices with via
 
 -   **R version**: `r R.version.string`
 -   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr`, `jsonlite`, 
-`stringr`, `ggthemes`, `renv`, `plotly`, `htmltools`, `maps`
+`stringr`, `ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, 
+`kableExtra`
 
 ```{r setup, message=F, echo=T, results='hide'}
 #Load required libraries
@@ -39,6 +40,8 @@ library(renv)
 library(plotly)
 library(htmltools)
 library(maps)
+library(knitr)
+library(kableExtra)
 ```
 
 # Input
@@ -169,33 +172,51 @@ if (most_common_country == "United States") {
   cat("According to the Shodan dataset, the", most_common_country,
       "is the country with the highest number of ransomware infections,", "with", 
     max(common_country_count),"incidents.", 
+    
     # Display the total number of ransomware infections
      "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
      "\n",
+    
     # Statistical Analysis
     "The average number of ransomware infections per country is", 
     round(mean(common_country_count), 2), "\n",  # Average
+    
     "The median number of ransomware infections per country is",
     median(common_country_count), "\n", # Median
+    
     "The standard deviation of ransomware infections per country is",
     round(sd(common_country_count), 2), "\n") # Standard Deviation
+  
 } else {
   # All other countries
   cat("According to the Shodan dataset,", most_common_country,
     "is the country with the highest number of ransomware infections,", "with", 
     max(common_country_count),"incidents.",
+    
 # Display the total number of ransomware infections
    "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
    "\n",
+
   # Statistical Analysis
   "The average number of ransomware infections per country is", 
   round(mean(common_country_count), 2), "\n",  # Average
+
   "The median number of ransomware infections per country is",
   median(common_country_count), "\n", # Median
+
   "The standard deviation of ransomware infections per country is",
   round(sd(common_country_count), 2), "\n") # Standard Deviation
 }
 
+```
+
+## Table of Ransomware Infections by Country
+```{r}
+# Table of Ransomware Infections by Country
+kable(common_country_count, caption = "Ransomware Infections by Country",
+      col.names = c("Country", "Number of Infections"), format = "html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  scroll_box(width = "100%", height = "500px") # Add a scroll box
 
 
 ```
