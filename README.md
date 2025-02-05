@@ -40,7 +40,6 @@ Add your **Shodan API key** to the `.Renviron` file to avoid exposing it in your
 -   [ ] Implement machine learning models to predict ransomware outbreaks.
 -   [ ] Enhance visualization with additional geospatial insights.
 -   [ ] Add more API query examples
--   [ ] Remove Antarctica from the list of countries in the interactive map
 
 ## License
 
