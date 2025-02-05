@@ -168,19 +168,34 @@ most_common_country <- paste(most_common_country, collapse = ", ")
 if (most_common_country == "United States") {
   cat("According to the Shodan dataset, the", most_common_country,
       "is the country with the highest number of ransomware infections,", "with", 
-      max(common_country_count),"incidents.", 
-      # Display the total number of ransomware infections
-       "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", 
-    "\n")
+    max(common_country_count),"incidents.", 
+    # Display the total number of ransomware infections
+     "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
+     "\n",
+    # Statistical Analysis
+    "The average number of ransomware infections per country is", 
+    round(mean(common_country_count), 2), "incident(s).", "\n",  # Average
+    "The median number of ransomware infections per country is",
+    median(common_country_count), "incident(s).", "\n", # Median
+    "The standard deviation of ransomware infections per country is",
+    round(sd(common_country_count), 2), "incident(s).", "\n") # Standard Deviation
 } else {
   # All other countries
   cat("According to the Shodan dataset,", most_common_country,
     "is the country with the highest number of ransomware infections,", "with", 
     max(common_country_count),"incidents.",
-    # Display the total number of ransomware infections
-    "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", 
-    "\n")
+# Display the total number of ransomware infections
+   "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
+   "\n",
+  # Statistical Analysis
+  "The average number of ransomware infections per country is", 
+  round(mean(common_country_count), 2), "incident(s).", "\n",  # Average
+  "The median number of ransomware infections per country is",
+  median(common_country_count), "incident(s).", "\n", # Median
+  "The standard deviation of ransomware infections per country is",
+  round(sd(common_country_count), 2), "incident(s).", "\n") # Standard Deviation
 }
+
 
 
 ```
