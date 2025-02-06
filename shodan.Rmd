@@ -23,20 +23,20 @@ This R Markdown file explores data regarding internet-connected devices with via
 ## Dependencies
 
 -   **R version**: `r R.version.string`
--   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr`, `jsonlite`, 
-`stringr`, `ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, 
-`kableExtra`
+-   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr2`, `stringr`, 
+`ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, `kableExtra`, 
+`jsonlite`
 
 ```{r setup, message=F, echo=T, results='hide'}
 #Load required libraries
 library(dplyr)
 library(tidyr)
 library(ggplot2)
-library(httr)
-library(jsonlite)
+library(httr2)
 library(stringr)
 library(ggthemes)
 library(renv)
+library(jsonlite)
 library(plotly)
 library(htmltools)
 library(maps)
@@ -58,64 +58,36 @@ api_url <- "https://api.shodan.io/shodan/host/search"
 # Parameters to query
 params <- list(
   key = api_key,
-  query = "has_screenshot:true encrypted" # ransomware related query
+  query = "has_screenshot:true encrypted", # ransomware related query
+  limit = 200 # Limit the number of results
 )
-
 ```
 
 # Retrieve Data from Shodan API
 
 ```{r}
-page <- 1  # Start with the first page
+# Send the request with httr2
+request <- request(api_url) |> 
+  req_url_query(!!!params) |> # !!! Splices into key value pairs
+  req_throttle(1) # API rate limit
 
-# Begin the loop to retrieve the data
-repeat {
-  params$page <- page  # Set the page number
+# Perform a request to get the response
+response <- req_perform(request)
 
-  # Print the page number
-  cat("Retrieving page", page, "of the Shodan dataset...\n")
-  flush.console()  # Ensures immediate output
+# Parse the JSON
+data <- resp_body_json(response, check_type = T, simplifyVector = T)
 
-  # Send the GET request
-  response <- GET(api_url, query = params)
-
-  # Return the error message if the status code is not 200
-  if (response$status_code != 200) {
-    stop(content(response, "text", encoding = "UTF-8"))
-  }
-
-  # Parse the JSON response
-  shodan_data <- fromJSON(content(response, "text", encoding = "UTF-8"))
-  max_pages <- ceiling(shodan_data$total / 100)  # Calculate the maximum number of pages)
-
-  # Create the dataframe
-  shodan_df <- as.data.frame(shodan_data$matches)
-  
-  # Append the data from the current page to the existing dataframe
-  if (page == 1) {
-    shodan_df_all <- shodan_df
-  } else {
-    shodan_df_all <- bind_rows(shodan_df_all, shodan_df)
-  }
-
-  Sys.sleep(1)  # Sleep for 1 second to avoid rate limiting
-  
-  # Stop after retrieving the maximum number of pages  
-  if (page >= max_pages) {
-    message("Reached the maximum number of pages. Stopping.")
-    break
-  }
-
-  page <- page + 1  # Increment the page number
-}
+# Convert into a dataframe
+shodan_df <- data.frame(data$matches)
 
 ```
+
 
 # Tidy Data
 
 ```{r , message=F, echo=T, results='hide'}
 # Select interesting columns
-shodan_df_ransomware <- shodan_df_all %>%
+shodan_df_ransomware <- shodan_df %>%
   select(ip_str, port, transport, product, os, location, screenshot)
 # Unnest nested columns
 shodan_df_ransomware <- shodan_df_ransomware %>%
@@ -166,15 +138,18 @@ common_country_names <- names(common_country_count)
 # Get the most common country
 most_common_country <- common_country_names[common_country_count == max(common_country_count)]
 # Collapse the most common country into a single string
-most_common_country <- paste(most_common_country, collapse = ", ")
+#most_common_country <- paste(most_common_country, collapse = ", ")
 
 
 # Output the most common country
 # If the most common country is the United States
-if (most_common_country == "United States") {
-  cat("According to the Shodan dataset, the", most_common_country,
-      "is the country with the highest number of ransomware infections,", "with", 
-    max(common_country_count),"incidents.", 
+if (length(most_common_country) > 1) {
+  
+  country_text <- paste(most_common_country, collapse = ", ")
+  
+  cat("According to the Shodan dataset,", country_text,
+      "are the countries with the highest number of ransomware infections, with",
+      max(common_country_count), "incidents.", 
     
     # Display the total number of ransomware infections
      "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
@@ -191,10 +166,10 @@ if (most_common_country == "United States") {
     round(sd(common_country_count), 2), "\n") # Standard Deviation
   
 } else {
-  # All other countries
+  
   cat("According to the Shodan dataset,", most_common_country,
-    "is the country with the highest number of ransomware infections,", "with", 
-    max(common_country_count),"incidents.",
+      "is the country with the highest number of ransomware infections, with",
+      max(common_country_count), "incidents.",
     
 # Display the total number of ransomware infections
    "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
@@ -230,8 +205,7 @@ kable(common_country_count, caption = "Ransomware Infections by Country",
 
 ```{r, fig.width=10, fig.height=6, fig.retina= 2}
 # Create a world map of ransomware infections
-ggplot(shodan_count, aes(x = Longitude, y = Latitude, 
-                         color = `Country Code`, size = n)) +
+ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) + 
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
@@ -260,11 +234,9 @@ ggplot(shodan_count, aes(x = Longitude, y = Latitude,
 ```{r, fig.width=10, fig.height=6, fig.retina= 2}
 # Make the map interactive
 p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, 
-                         color = `Country Code`, size = n,
-                         # Text input for tooltip
-                         text = paste(" City:", `City`, "<br>", 
-                                      "Country:", `Country`,"<br>",
-                                      "Number of Infections:", n))) +
+                              color = `Country`, size = n, 
+                              text = paste(" City:", `City`, "<br>", "Country:", `Country`,
+                                           "<br>", "Number of Infections:", n))) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
