@@ -115,7 +115,7 @@ shodan_df_ransomware <- shodan_df_ransomware %>%
   arrange(Country)
 
 # Write the data to a CSV file
-write.csv(shodan_df_ransomware, "~/R/ShodanR/docs/shodan_ransomware.csv", row.names = FALSE)
+write.csv(shodan_df_ransomware, "data/shodan_ransomware.csv", row.names = FALSE)
 
 ```
 
