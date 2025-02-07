@@ -164,9 +164,9 @@ According to the Shodan dataset, **{country_text}** are the countries with the h
 There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worldwide!
 
 ### Statistical Analysis
-- The **mean** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
-- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
-- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
+- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**
+- The **median** number of ransomware infections per country is **{median(common_country_count)}**
+- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**
 ")
 } else {
   glue("
@@ -177,9 +177,9 @@ According to the Shodan dataset, **{most_common_country}** is the country with t
 There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worldwide!
 
 ### Statistical Analysis
-- The **mean** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
-- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
-- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
+- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**
+- The **median** number of ransomware infections per country is **{median(common_country_count)}**
+- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**
 ")
 }
 
