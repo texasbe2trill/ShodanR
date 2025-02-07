@@ -1,5 +1,5 @@
 ---
-title: "Parsing Data from Shodan API in R"
+title: "Extracting and Analyzing Ransomware Data in R"
 author: "Chris Campbell"
 date: "`r Sys.Date()`"
 output:
@@ -18,16 +18,16 @@ always_allow_html: true
 
 # Introduction
 
-This R Markdown file explores data regarding internet-connected devices with via the Shodan API.
+This R Markdown file delves into analyzing ransomware infections using data extracted from the Shodan API. By analyzing real-time data on internet-connected devices, we explore ransomware trends across various countries and cities. Through data visualizations and statistical analysis, we aim to identify geographic hotspots of ransomware activity, comprehend infection patterns, and provide valuable insights for cybersecurity professionals. The project underscores the importance of monitoring and comprehending ransomware incidents to enhance global cyber defenses.
 
 ## Dependencies
 
 -   **R version**: `r R.version.string`
--   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr2`, `stringr`, 
-`ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, `kableExtra`, 
-`jsonlite`
+-   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr2`, `stringr`,
+`ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, `kableExtra`,
+`jsonlite`, `lintr`, `glue`
 
-```{r setup, message=F, echo=T, results='hide'}
+```{r libraries, setup, message=F, echo=T, results='hide', include=FALSE}
 #Load required libraries
 library(dplyr)
 library(tidyr)
@@ -42,15 +42,19 @@ library(htmltools)
 library(maps)
 library(knitr)
 library(kableExtra)
+library(lintr)
+library(glue)
 ```
 
-# Input
+# Shodan API Overview
 
--   **Shodan API Base URL**:(https://api.shodan.io)
+The Shodan API, a powerful tool for searching and retrieving data on internet-connected devices, provides information about devices’ locations, services, vulnerabilities, and more. In this project, the API is used to analyze global trends and patterns of ransomware infections.
 
+-   [Shodan API Base URL ](https://api.shodan.io/shodan/)
+
+```{r api-query, include=FALSE}
 ## Query Data from Shodan API
 
-```{r}
 # Shodan api key and endpoint
 api_key <- Sys.getenv("SHODAN_API_KEY") # Enter your API key here
 api_url <- "https://api.shodan.io/shodan/host/search"
@@ -63,11 +67,12 @@ params <- list(
 )
 ```
 
-# Retrieve Data from Shodan API
 
-```{r}
+```{r api-request, include=FALSE}
+## Retrieve Data from Shodan API
+
 # Send the request with httr2
-request <- request(api_url) |> 
+request <- request(api_url) |>
   req_url_query(!!!params) |> # !!! Splices into key value pairs
   req_throttle(1) # API rate limit
 
@@ -83,9 +88,9 @@ shodan_df <- data.frame(data$matches)
 ```
 
 
+```{r tidy-data, message=FALSE, include=FALSE, results='hide'}
 # Tidy Data
 
-```{r , message=F, echo=T, results='hide'}
 # Select interesting columns
 shodan_df_ransomware <- shodan_df %>%
   select(ip_str, port, transport, product, os, location, screenshot)
@@ -99,11 +104,11 @@ colnames(shodan_df_ransomware)
 
 # Select interesting columns from unnested dataframe
 shodan_df_ransomware <- shodan_df_ransomware %>%
-  select(ip_str, port, transport, product,os, country_name, country_code, city, 
+  select(ip_str, port, transport, product,os, country_name, country_code, city,
          longitude, latitude, text)
 
 # Rename the columns
-colnames(shodan_df_ransomware) <- c("IP Address", "Port", "Transport", "Service", 
+colnames(shodan_df_ransomware) <- c("IP Address", "Port", "Transport", "Service",
                                     "Operating System", "Country", "Country Code",
                                     "City", "Longitude", "Latitude","Ransom Letter")
 
@@ -121,76 +126,74 @@ write.csv(shodan_df_ransomware, "data/shodan_ransomware.csv", row.names = FALSE)
 
 # Data Analysis of Ransomware Infections
 
-```{r}
-# Create a frequency table with the counts
+This section analyzes ransomware infections. It starts with a summary of affected countries and reported incidents. A statistical analysis presents key metrics on infection distribution. The section concludes with a table detailing ransomware incidents by country and city, revealing geographic trends and high-infection areas.
+
+```{r data-analysis, echo=FALSE, results='asis'}
+# Frequency table of infections by country
 common_country_count <- table(shodan_df_ransomware$Country)
 common_country_count <- sort(common_country_count, decreasing = TRUE) # Sort the count in descending order
-
-# Count the number of times values in Country appear
-shodan_count <- shodan_df_ransomware %>%
-  group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
-  count(Country)
-
-
 # Get the names of the counts
 common_country_names <- names(common_country_count)
-
 # Get the most common country
 most_common_country <- common_country_names[common_country_count == max(common_country_count)]
 
 
-# Output the most common country
-if (length(most_common_country) > 1) {
-  
+# Frequency table of infections by country and city
+common_country_city_count <- table(shodan_df_ransomware$Country, shodan_df_ransomware$City)
+# Convert the table to a dataframe
+common_country_city_count <- as.data.frame(common_country_city_count)
+# Removes frequencies that are zero
+common_country_city_count <- common_country_city_count[common_country_city_count$Freq != 0, ]
+# Sorts the dataframe by the first column
+common_country_city_count <- common_country_city_count[order(-common_country_city_count$Freq), ]
+# Rename the columns
+colnames(common_country_city_count) <- c("Country", "City", "Number of Infections")
+
+
+
+# Construct the summary text
+summary_text <- if (length(most_common_country) > 1) {
   country_text <- paste(most_common_country, collapse = ", ")
-  
-  cat("According to the Shodan dataset,", country_text,
-      "are the countries with the highest number of ransomware infections, with",
-      max(common_country_count), "incidents.", 
-    
-    # Display the total number of ransomware infections
-     "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
-     "\n",
-    
-    # Statistical Analysis
-    "The mean number of ransomware infections per country is", 
-    round(mean(common_country_count), 2), "\n",  # Mean
-    
-    "The median number of ransomware infections per country is",
-    median(common_country_count), "\n", # Median
-    
-    "The standard deviation of ransomware infections per country is",
-    round(sd(common_country_count), 2), "\n") # Standard Deviation
-  
+  glue("
+## Ransomware Infections Summary
+
+According to the Shodan dataset, **{country_text}** are the countries with the highest number of ransomware infections, with **{max(common_country_count)}** incidents.
+
+There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worldwide!
+
+### Statistical Analysis
+- The **mean** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
+- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
+- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
+")
 } else {
-  
-  cat("According to the Shodan dataset,", most_common_country,
-      "is the country with the highest number of ransomware infections, with",
-      max(common_country_count), "incidents.",
-    
-# Display the total number of ransomware infections
-   "There are a total of", nrow(shodan_df_ransomware), "ransomware infections worldwide!", "\n",
-   "\n",
+  glue("
+## Ransomware Infections Summary
 
-  # Statistical Analysis
-  "The mean number of ransomware infections per country is", 
-  round(mean(common_country_count), 2), "\n",  # Mean
+According to the Shodan dataset, **{most_common_country}** is the country with the highest number of ransomware infections, with **{max(common_country_count)}** incidents.
 
-  "The median number of ransomware infections per country is",
-  median(common_country_count), "\n", # Median
+There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worldwide!
 
-  "The standard deviation of ransomware infections per country is",
-  round(sd(common_country_count), 2), "\n") # Standard Deviation
-
+### Statistical Analysis
+- The **mean** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
+- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
+- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
+")
 }
+
+# Display the summary
+cat(summary_text, "\n")
 
 ```
 
-## Table of Ransomware Infections by Country
-```{r}
+## Table of Ransomware Infections by Country and City
+
+This comprehensive table offers a detailed breakdown of ransomware infection rates across various countries and cities. It presents country and city names alongside the corresponding number of ransomware incidents, making it easy to compare regions. This table serves as a crucial reference point for understanding global ransomware trends and identifying areas where cyber defenses may need reinforcement.
+
+```{r data-table, echo=FALSE}
 # Table of Ransomware Infections by Country
-kable(common_country_count, caption = "Ransomware Infections by Country",
-      col.names = c("Country", "Number of Infections"), format = "html") %>%
+kable(common_country_city_count, caption = "Distribution of Ransomware Infections by Country and City",
+      col.names = c("Country", "City", "Number of Infections"), format = "html") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
   scroll_box(width = "100%", height = "500px") # Add a scroll box
 
@@ -199,17 +202,22 @@ kable(common_country_count, caption = "Ransomware Infections by Country",
 
 # Data Visualization of Ransomware Infections
 
-## Ransomware Infections by Country and City
+This section visualizes ransomware infection patterns globally. It maps incidents at country and city levels using Shodan API data, highlighting affected regions and trends. An interactive map lets users zoom in and examine infection details, making it useful for cybersecurity professionals and researchers.
 
-```{r, r map-plot, echo=FALSE, fig.width=10, fig.height=6, out.width="100%"}
+```{r map-plot, eval=FALSE, fig.height=6, fig.width=10, include=FALSE, out.width="100%"}
+# Count the number of times values in Country appear
+shodan_count <- shodan_df_ransomware %>%
+  group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
+  count(Country)
+
 # Create a world map of ransomware infections
-ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) + 
+ m <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
-  labs(title = "Ransomware Infections by Country and City",
+  labs(title = "The Global Impact of Ransomware Infections",
        caption = "Source: Shodan API",
        x = "Longitude",
        y = "Latitude",
@@ -225,14 +233,22 @@ ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = 
         axis.title.y = element_blank(),
         legend.position = "none", # Removes the fill legend
         plot.title = element_text(hjust = 0.5)) # Center the title
+
 ```
 
-## Interactive Ransomware Infections Map
+## Exploring Ransomware Hotspots
 
-```{r interactive-map-plot, echo=FALSE, fig.width=10, fig.height=6, out.width="100%"}
+This data visualization explores the global distribution of ransomware infections, focusing on the geographical hotspots by country and city. Using data from the Shodan API, the map highlights areas with the highest concentrations of ransomware incidents, shedding light on trends and patterns in cyberattacks. By mapping ransomware infections based on real-time data, the visualization provides insights into which regions are most affected and allows for a better understanding of the geographic spread of these cyber threats. The interactive map enables users to zoom in on specific locations and view detailed information on the number of incidents, cities, and countries impacted, offering valuable insights for cybersecurity professionals and researchers.
+
+```{r interactive-map-plot, echo=FALSE, fig.height=6, fig.width=10, out.width="100%"}
+# Count the number of times values in Country appear
+shodan_count <- shodan_df_ransomware %>%
+  group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
+  count(Country)
+
 # Make the map interactive
-p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, 
-                              color = `Country`, size = n, 
+p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude,
+                              color = `Country`, size = n,
                               text = paste(" City:", `City`, "<br>", "Country:", `Country`,
                                            "<br>", "Number of Infections:", n))) +
   borders("world", colour = "gray50", fill = "gray50") +
@@ -240,7 +256,7 @@ p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude,
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
-  labs(title = "Ransomware Infections by Country and City",
+  labs(title = "The Global Impact of Ransomware Infections",
        x = "Longitude",
        y = "Latitude",
        color = "Country") +
