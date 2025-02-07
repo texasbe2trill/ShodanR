@@ -137,12 +137,9 @@ common_country_names <- names(common_country_count)
 
 # Get the most common country
 most_common_country <- common_country_names[common_country_count == max(common_country_count)]
-# Collapse the most common country into a single string
-#most_common_country <- paste(most_common_country, collapse = ", ")
 
 
 # Output the most common country
-# If the most common country is the United States
 if (length(most_common_country) > 1) {
   
   country_text <- paste(most_common_country, collapse = ", ")
@@ -156,8 +153,8 @@ if (length(most_common_country) > 1) {
      "\n",
     
     # Statistical Analysis
-    "The average number of ransomware infections per country is", 
-    round(mean(common_country_count), 2), "\n",  # Average
+    "The mean number of ransomware infections per country is", 
+    round(mean(common_country_count), 2), "\n",  # Mean
     
     "The median number of ransomware infections per country is",
     median(common_country_count), "\n", # Median
@@ -176,14 +173,15 @@ if (length(most_common_country) > 1) {
    "\n",
 
   # Statistical Analysis
-  "The average number of ransomware infections per country is", 
-  round(mean(common_country_count), 2), "\n",  # Average
+  "The mean number of ransomware infections per country is", 
+  round(mean(common_country_count), 2), "\n",  # Mean
 
   "The median number of ransomware infections per country is",
   median(common_country_count), "\n", # Median
 
   "The standard deviation of ransomware infections per country is",
   round(sd(common_country_count), 2), "\n") # Standard Deviation
+
 }
 
 ```
@@ -201,9 +199,9 @@ kable(common_country_count, caption = "Ransomware Infections by Country",
 
 # Data Visualization of Ransomware Infections
 
-## Ransomware Infections by Country and City (ggplot2)
+## Ransomware Infections by Country and City
 
-```{r, fig.width=10, fig.height=6, fig.retina= 2}
+```{r, r map-plot, echo=FALSE, fig.width=10, fig.height=6, out.width="100%"}
 # Create a world map of ransomware infections
 ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) + 
   borders("world", colour = "gray50", fill = "gray50") +
@@ -215,7 +213,7 @@ ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = 
        caption = "Source: Shodan API",
        x = "Longitude",
        y = "Latitude",
-       color = "Country Code") +
+       color = "Country") +
   theme_fivethirtyeight() +
   # Remove the gridlines and axis labels
   theme(panel.grid.major = element_blank(),
@@ -229,9 +227,9 @@ ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = 
         plot.title = element_text(hjust = 0.5)) # Center the title
 ```
 
-## Interactive Ransomware Infections Map (plotly)
+## Interactive Ransomware Infections Map
 
-```{r, fig.width=10, fig.height=6, fig.retina= 2}
+```{r interactive-map-plot, echo=FALSE, fig.width=10, fig.height=6, out.width="100%"}
 # Make the map interactive
 p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, 
                               color = `Country`, size = n, 
@@ -245,7 +243,7 @@ p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude,
   labs(title = "Ransomware Infections by Country and City",
        x = "Longitude",
        y = "Latitude",
-       color = "Country Code") +
+       color = "Country") +
   theme_fivethirtyeight() +
   # Remove the gridlines and axis labels
   theme(panel.grid.major = element_blank(),
@@ -267,7 +265,8 @@ ggplotly(p, tooltip = "text") %>%
            align. = "right", # Right-align ext
            showarrow = F,
            xref = "paper", yref = "paper", # Keep caption relative to plot
-           font = list(size = 12, color = "gray50")
+           font = list(size = 12, color = "gray50"),
+           autosize = T
          )
   )
 ```
