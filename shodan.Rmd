@@ -1,5 +1,5 @@
 ---
-title: "Extracting and Analyzing Ransomware Data in R"
+title: "Analyzing Ransomware Data in R"
 author: "Chris Campbell"
 date: "`r Sys.Date()`"
 output:
