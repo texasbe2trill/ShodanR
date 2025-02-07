@@ -18,16 +18,18 @@ always_allow_html: true
 
 # Introduction
 
-This R Markdown file delves into analyzing ransomware infections using data extracted from the Shodan API. By analyzing real-time data on internet-connected devices, we explore ransomware trends across various countries and cities. Through data visualizations and statistical analysis, we aim to identify geographic hotspots of ransomware activity, comprehend infection patterns, and provide valuable insights for cybersecurity professionals. The project underscores the importance of monitoring and comprehending ransomware incidents to enhance global cyber defenses.
+This project delves into analyzing ransomware infections using data extracted from the Shodan API. By analyzing real-time data on internet-connected devices, we explore ransomware trends across various countries and cities. Through data visualizations and statistical analysis, we aim to identify geographic hotspots of ransomware activity, comprehend infection patterns, and provide valuable insights for cybersecurity professionals. The project underscores the importance of monitoring and comprehending ransomware incidents to enhance global cyber defenses.
 
-## Dependencies
-
--   **R version**: `r R.version.string`
--   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr2`, `stringr`,
-`ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, `kableExtra`,
-`jsonlite`, `lintr`, `glue`
 
 ```{r libraries, setup, message=F, echo=T, results='hide', include=FALSE}
+## Dependencies
+
+# -   **R version**: `r R.version.string`
+# -   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr2`, `stringr`,
+# `ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, `kableExtra`,
+# `jsonlite`, `lintr`, `glue`
+
+
 # Load required libraries
 library(dplyr)
 library(tidyr)
@@ -46,7 +48,7 @@ library(lintr)
 library(glue)
 ```
 
-# Shodan API Overview
+## Shodan API Overview
 
 The Shodan API, a powerful tool for searching and retrieving data on internet-connected devices, provides information about devices’ locations, services, vulnerabilities, and more. In this project, the API is used to analyze global trends and patterns of ransomware infections.
 
