@@ -28,7 +28,7 @@ This R Markdown file delves into analyzing ransomware infections using data extr
 `jsonlite`, `lintr`, `glue`
 
 ```{r libraries, setup, message=F, echo=T, results='hide', include=FALSE}
-#Load required libraries
+# Load required libraries
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -84,7 +84,6 @@ data <- resp_body_json(response, check_type = T, simplifyVector = T)
 
 # Convert into a dataframe
 shodan_df <- data.frame(data$matches)
-
 ```
 
 
@@ -104,13 +103,17 @@ colnames(shodan_df_ransomware)
 
 # Select interesting columns from unnested dataframe
 shodan_df_ransomware <- shodan_df_ransomware %>%
-  select(ip_str, port, transport, product,os, country_name, country_code, city,
-         longitude, latitude, text)
+  select(
+    ip_str, port, transport, product, os, country_name, country_code, city,
+    longitude, latitude, text
+  )
 
 # Rename the columns
-colnames(shodan_df_ransomware) <- c("IP Address", "Port", "Transport", "Service",
-                                    "Operating System", "Country", "Country Code",
-                                    "City", "Longitude", "Latitude","Ransom Letter")
+colnames(shodan_df_ransomware) <- c(
+  "IP Address", "Port", "Transport", "Service",
+  "Operating System", "Country", "Country Code",
+  "City", "Longitude", "Latitude", "Ransom Letter"
+)
 
 # Group by Country Code
 shodan_df_ransomware <- shodan_df_ransomware %>%
@@ -121,7 +124,6 @@ shodan_df_ransomware <- shodan_df_ransomware %>%
 
 # Write the data to a CSV file
 write.csv(shodan_df_ransomware, "data/shodan_ransomware.csv", row.names = FALSE)
-
 ```
 
 # Data Analysis of Ransomware Infections
@@ -183,7 +185,6 @@ There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worl
 
 # Display the summary
 cat(summary_text, "\n")
-
 ```
 
 ## Table of Ransomware Infections by Country and City
@@ -192,12 +193,12 @@ This comprehensive table offers a detailed breakdown of ransomware infection rat
 
 ```{r data-table, echo=FALSE}
 # Table of Ransomware Infections by Country
-kable(common_country_city_count, caption = "Distribution of Ransomware Infections by Country and City",
-      col.names = c("Country", "City", "Number of Infections"), format = "html") %>%
+kable(common_country_city_count,
+  caption = "Distribution of Ransomware Infections by Country and City",
+  col.names = c("Country", "City", "Number of Infections"), format = "html"
+) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
   scroll_box(width = "100%", height = "500px") # Add a scroll box
-
-
 ```
 
 # Data Visualization of Ransomware Infections
@@ -211,29 +212,32 @@ shodan_count <- shodan_df_ransomware %>%
   count(Country)
 
 # Create a world map of ransomware infections
- m <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) +
+m <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
-  labs(title = "The Global Impact of Ransomware Infections",
-       caption = "Source: Shodan API",
-       x = "Longitude",
-       y = "Latitude",
-       color = "Country") +
+  labs(
+    title = "The Global Impact of Ransomware Infections",
+    caption = "Source: Shodan API",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Country"
+  ) +
   theme_fivethirtyeight() +
   # Remove the gridlines and axis labels
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "none", # Removes the fill legend
-        plot.title = element_text(hjust = 0.5)) # Center the title
-
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none", # Removes the fill legend
+    plot.title = element_text(hjust = 0.5)
+  ) # Center the title
 ```
 
 ## Exploring Ransomware Hotspots
@@ -247,42 +251,51 @@ shodan_count <- shodan_df_ransomware %>%
   count(Country)
 
 # Make the map interactive
-p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude,
-                              color = `Country`, size = n,
-                              text = paste(" City:", `City`, "<br>", "Country:", `Country`,
-                                           "<br>", "Number of Infections:", n))) +
+p <- ggplot(shodan_count, aes(
+  x = Longitude, y = Latitude,
+  color = `Country`, size = n,
+  text = paste(
+    " City:", `City`, "<br>", "Country:", `Country`,
+    "<br>", "Number of Infections:", n
+  )
+)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
-  labs(title = "The Global Impact of Ransomware Infections",
-       x = "Longitude",
-       y = "Latitude",
-       color = "Country") +
+  labs(
+    title = "The Global Impact of Ransomware Infections",
+    x = "Longitude",
+    y = "Latitude",
+    color = "Country"
+  ) +
   theme_fivethirtyeight() +
   # Remove the gridlines and axis labels
-  theme(panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "none", # Removes the fill legend
-        plot.title = element_text(hjust = 0.5)) # Center the title
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank(),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    legend.position = "none", # Removes the fill legend
+    plot.title = element_text(hjust = 0.5)
+  ) # Center the title
 
 ggplotly(p, tooltip = "text") %>%
-  layout(hoverlabel = list(align = "left"),
-         # Create a caption for plot
-         annotations = list(
-           text = "Source: Shodan API",
-           x = 1, y = -0.05, # Moves caption to right edge and below plot
-           align. = "right", # Right-align ext
-           showarrow = F,
-           xref = "paper", yref = "paper", # Keep caption relative to plot
-           font = list(size = 12, color = "gray50"),
-           autosize = T
-         )
+  layout(
+    hoverlabel = list(align = "left"),
+    # Create a caption for plot
+    annotations = list(
+      text = "Source: Shodan API",
+      x = 1, y = -0.05, # Moves caption to right edge and below plot
+      align. = "right", # Right-align ext
+      showarrow = F,
+      xref = "paper", yref = "paper", # Keep caption relative to plot
+      font = list(size = 12, color = "gray50"),
+      autosize = T
+    )
   )
 ```
