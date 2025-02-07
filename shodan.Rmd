@@ -50,7 +50,7 @@ library(glue)
 
 The Shodan API, a powerful tool for searching and retrieving data on internet-connected devices, provides information about devices’ locations, services, vulnerabilities, and more. In this project, the API is used to analyze global trends and patterns of ransomware infections.
 
--   [Shodan API Base URL ](https://api.shodan.io/shodan/)
+-   [Shodan API Documentation ](https://developer.shodan.io/api)
 
 ```{r api-query, include=FALSE}
 ## Query Data from Shodan API
