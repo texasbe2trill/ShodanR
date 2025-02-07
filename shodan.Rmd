@@ -159,7 +159,7 @@ summary_text <- if (length(most_common_country) > 1) {
   glue("
 ## Ransomware Infections Summary
 
-According to the Shodan dataset, **{country_text}** are the countries with the highest number of ransomware infections, with **{max(common_country_count)}** incidents.
+According to the Shodan dataset, **{country_text}** are the countries with the highest number of ransomware infections, with **{max(common_country_count)}** incidents each.
 
 There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worldwide!
 
