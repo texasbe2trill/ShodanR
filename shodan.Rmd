@@ -208,7 +208,7 @@ kable(common_country_count, caption = "Ransomware Infections by Country",
 ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) + 
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
-  #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
+  coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
   labs(title = "Ransomware Infections by Country and City",
@@ -239,11 +239,10 @@ p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude,
                                            "<br>", "Number of Infections:", n))) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
-  #coord_quickmap(xlim = c(-180, 180), ylim = c(-60, 90)) +
+  coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
   theme_map() +
   labs(title = "Ransomware Infections by Country and City",
-       caption = "Source: Shodan API",
        x = "Longitude",
        y = "Latitude",
        color = "Country Code") +
@@ -260,7 +259,15 @@ p <- ggplot(shodan_count, aes(x = Longitude, y = Latitude,
         plot.title = element_text(hjust = 0.5)) # Center the title
 
 ggplotly(p, tooltip = "text") %>%
-  layout(hoverlabel = list(
-    align = "left"
-  ))
+  layout(hoverlabel = list(align = "left"),
+         # Create a caption for plot
+         annotations = list(
+           text = "Source: Shodan API",
+           x = 1, y = -0.05, # Moves caption to right edge and below plot
+           align. = "right", # Right-align ext
+           showarrow = F,
+           xref = "paper", yref = "paper", # Keep caption relative to plot
+           font = list(size = 12, color = "gray50")
+         )
+  )
 ```
