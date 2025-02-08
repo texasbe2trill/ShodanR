@@ -298,5 +298,6 @@ ggplotly(p, tooltip = "text") %>%
       xref = "paper", yref = "paper", # Keep caption relative to plot
       font = list(size = 12, color = "gray50")
     )
-  )
+  ) %>%
+  config(responsive = T)
 ```
