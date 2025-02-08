@@ -267,7 +267,7 @@ p <- ggplot(shodan_count, aes(
   geom_point() +
   theme_map() +
   labs(
-    title = "The Global Impact of Ransomware Infections",
+    title = "Ransomware Hotspots Across the Globe",
     x = "Longitude",
     y = "Latitude",
     color = "Country"
