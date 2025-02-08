@@ -296,7 +296,8 @@ ggplotly(p, tooltip = "text") %>%
       align. = "right", # Right-align ext
       showarrow = F,
       xref = "paper", yref = "paper", # Keep caption relative to plot
-      font = list(size = 12, color = "gray50")
+      font = list(size = 12, color = "gray50"),
+      autosize = T
     )
   ) %>%
   config(responsive = T)
