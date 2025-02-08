@@ -147,7 +147,7 @@ num_countries <- length(unique(shodan_df_ransomware$Country))
 
 # Frequency table of infections by country and city
 common_country_city_count <- table(shodan_df_ransomware$Country, shodan_df_ransomware$City)
-# Convert the table to a dataframe
+# Counts of just the cities
 common_country_city_count <- as.data.frame(common_country_city_count)
 # Removes frequencies that are zero
 common_country_city_count <- common_country_city_count[common_country_city_count$Freq != 0, ]
@@ -157,35 +157,52 @@ common_country_city_count <- common_country_city_count[order(-common_country_cit
 colnames(common_country_city_count) <- c("Country", "City", "Number of Infections")
 
 
+# Most infections per city
+common_city_count <- table(shodan_df_ransomware$City)
+common_city_count <- sort(common_city_count, decreasing = TRUE)
+# Names of the count
+common_city_names <- names(common_city_count)
+# The most common city
+most_common_city <- common_city_names[common_city_count == max(common_city_count)]
+
+
+
+# Initialize summary variables globally
+country_text <- ""
+city_text <- ""
 
 # Construct the summary text
-summary_text <- if (length(most_common_country) > 1) {
+summary_text <- if (length(most_common_country) > 1 | length(most_common_city) > 1) {
+  # If there are multiple countries or cities
   country_text <- paste(most_common_country, collapse = ", ")
+  city_text <- paste(most_common_city, collapse = ", ")
   glue("
 ## Ransomware Infections Summary
 
-According to the Shodan dataset, **{country_text}** are the countries with the highest number of ransomware infections, with **{max(common_country_count)}** incidents each.
+According to the Shodan dataset, a total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, impacting **{num_countries}** countries. The countries with the highest number of ransomware infections are **{country_text}**, each reporting **{max(common_country_count)}** incidents.
 
-A total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, affecting **{num_countries}**
-countries!
+The cities with the most ransomware infections are **{city_text}**, each with **{max(common_city_count)}** incidents.
 
 ### Statistical Analysis
-- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**
-- The **median** number of ransomware infections per country is **{median(common_country_count)}**
-- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**
+- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
+- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
+- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
 ")
 } else {
+  # If there is only one most common country or city
+  country_text <- most_common_country
+  city_text <- most_common_city
   glue("
 ## Ransomware Infections Summary
 
-According to the Shodan dataset, **{most_common_country}** is the country with the highest number of ransomware infections, with **{max(common_country_count)}** incidents.
+According to the Shodan dataset, a total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, impacting **{num_countries}** countries. **{country_text}** has the highest number of ransomware infections, reporting **{max(common_country_count)}** incidents.
 
-A total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, affecting **{num_countries}** countries!
+The city with the most ransomware infections is **{city_text}**, with **{max(common_city_count)}** incidents.
 
 ### Statistical Analysis
-- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**
-- The **median** number of ransomware infections per country is **{median(common_country_count)}**
-- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**
+- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
+- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
+- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
 ")
 }
 
