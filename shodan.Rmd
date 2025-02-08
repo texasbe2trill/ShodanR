@@ -83,7 +83,7 @@ request <- request(api_url) |>
 response <- req_perform(request)
 
 # Parse the JSON
-data <- resp_body_json(response, check_type = T, simplifyVector = T)
+data <- resp_body_json(response, check_type = TRUE, simplifyVector = TRUE)
 
 # Convert into a dataframe
 shodan_df <- data.frame(data$matches)
@@ -136,25 +136,33 @@ This section analyzes ransomware infections. It starts with a summary of affecte
 ```{r data-analysis, echo=FALSE, results='asis'}
 # Frequency table of infections by country
 common_country_count <- table(shodan_df_ransomware$Country)
-common_country_count <- sort(common_country_count, decreasing = TRUE) # Sort the count in descending order
+# Sort the count in descending order
+common_country_count <- sort(common_country_count, decreasing = TRUE)
 # Get the names of the counts
 common_country_names <- names(common_country_count)
 # Get the most common country
-most_common_country <- common_country_names[common_country_count == max(common_country_count)]
+most_common_country <- common_country_names[common_country_count ==
+                                              max(common_country_count)]
 # Unique Countries
 num_countries <- length(unique(shodan_df_ransomware$Country))
 
 
 # Frequency table of infections by country and city
-common_country_city_count <- table(shodan_df_ransomware$Country, shodan_df_ransomware$City)
+common_country_city_count <- table(
+  shodan_df_ransomware$Country,
+  shodan_df_ransomware$City
+)
 # Counts of just the cities
 common_country_city_count <- as.data.frame(common_country_city_count)
 # Removes frequencies that are zero
-common_country_city_count <- common_country_city_count[common_country_city_count$Freq != 0, ]
+common_country_city_count <-
+  common_country_city_count[common_country_city_count$Freq != 0, ]
 # Sorts the dataframe by the first column
-common_country_city_count <- common_country_city_count[order(-common_country_city_count$Freq), ]
+common_country_city_count <-
+  common_country_city_count[order(-common_country_city_count$Freq), ]
 # Rename the columns
-colnames(common_country_city_count) <- c("Country", "City", "Number of Infections")
+colnames(common_country_city_count) <-
+  c("Country", "City", "Number of Infections")
 
 
 # Most infections per city
@@ -163,7 +171,8 @@ common_city_count <- sort(common_city_count, decreasing = TRUE)
 # Names of the count
 common_city_names <- names(common_city_count)
 # The most common city
-most_common_city <- common_city_names[common_city_count == max(common_city_count)]
+most_common_city <-
+  common_city_names[common_city_count == max(common_city_count)]
 
 
 
@@ -172,21 +181,30 @@ country_text <- ""
 city_text <- ""
 
 # Construct the summary text
-summary_text <- if (length(most_common_country) > 1 | length(most_common_city) > 1) {
+summary_text <- if (length(most_common_country) > 1 ||
+                      length(most_common_city) > 1) {
   # If there are multiple countries or cities
   country_text <- paste(most_common_country, collapse = ", ")
   city_text <- paste(most_common_city, collapse = ", ")
   glue("
 ## Ransomware Infections Summary
 
-According to the Shodan dataset, a total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, impacting **{num_countries}** countries. The countries with the highest number of ransomware infections are **{country_text}**, each reporting **{max(common_country_count)}** incidents.
+According to the Shodan dataset, a total of **{nrow(shodan_df_ransomware)}**
+ransomware infections have been reported worldwide, impacting
+**{num_countries}** countries. The countries with the highest number of
+ransomware infections are
+**{country_text}**, each reporting **{max(common_country_count)}** incidents.
 
-The cities with the most ransomware infections are **{city_text}**, each with **{max(common_city_count)}** incidents.
+The cities with the most ransomware infections are **{city_text}**,
+each with **{max(common_city_count)}** incidents.
 
 ### Statistical Analysis
-- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
-- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
-- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
+- The **average** number of ransomware infections per country is
+**{round(mean(common_country_count), 2)}**.
+- The **median** number of ransomware infections per country is
+**{median(common_country_count)}**.
+- The **standard deviation** of ransomware infections per country is
+**{round(sd(common_country_count), 2)}**.
 ")
 } else {
   # If there is only one most common country or city
@@ -195,14 +213,22 @@ The cities with the most ransomware infections are **{city_text}**, each with **
   glue("
 ## Ransomware Infections Summary
 
-According to the Shodan dataset, a total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, impacting **{num_countries}** countries. **{country_text}** has the highest number of ransomware infections, reporting **{max(common_country_count)}** incidents.
+According to the Shodan dataset, a total of **{nrow(shodan_df_ransomware)}**
+ransomware infections have been reported worldwide,
+impacting **{num_countries}** countries. **{country_text}** has the highest
+number of ransomware infections, reporting **{max(common_country_count)}**
+incidents.
 
-The city with the most ransomware infections is **{city_text}**, with **{max(common_city_count)}** incidents.
+The city with the most ransomware infections is **{city_text}**, with
+**{max(common_city_count)}** incidents.
 
 ### Statistical Analysis
-- The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**.
-- The **median** number of ransomware infections per country is **{median(common_country_count)}**.
-- The **standard deviation** of ransomware infections per country is **{round(sd(common_country_count), 2)}**.
+- The **average** number of ransomware infections per country is
+**{round(mean(common_country_count), 2)}**.
+- The **median** number of ransomware infections per country is
+**{median(common_country_count)}**.
+- The **standard deviation** of ransomware infections per country is
+**{round(sd(common_country_count), 2)}**.
 ")
 }
 
@@ -220,7 +246,10 @@ kable(common_country_city_count,
   caption = "Distribution of Ransomware Infections by Country and City",
   col.names = c("Country", "City", "Number of Infections"), format = "html"
 ) %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
+  kable_styling(bootstrap_options = c(
+    "striped", "hover", "condensed",
+    "responsive"
+  )) %>%
   scroll_box(width = "100%", height = "500px") # Add a scroll box
 ```
 
@@ -228,14 +257,17 @@ kable(common_country_city_count,
 
 This section visualizes ransomware infection patterns globally. It maps incidents at country and city levels using Shodan API data, highlighting affected regions and trends. An interactive map lets users zoom in and examine infection details, making it useful for cybersecurity professionals and researchers.
 
-```{r map-plot, eval=FALSE, fig.height=6, fig.width=10, include=FALSE, out.width="100%"}
+```{r map-plot, eval=FALSE, include=FALSE}
 # Count the number of times values in Country appear
 shodan_count <- shodan_df_ransomware %>%
   group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
   count(Country)
 
 # Create a world map of ransomware infections
-m <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, size = n)) +
+m <- ggplot(shodan_count, aes(
+  x = Longitude, y = Latitude, color = `Country`,
+  size = n
+)) +
   borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +

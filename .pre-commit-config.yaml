@@ -10,13 +10,8 @@ repos:
   - repo: https://github.com/lorenzwalthert/precommit
     rev: v0.4.3.9003
     hooks:
-      - id: style-files
-        args: [--style_pkg=styler, --style_fun=tidyverse_style, --cache-root=styler-perm]
-        exclude: >
-          (?x)^(
-          tests/testthat/in/.*|
-          renv/.*
-          )$
+      - id: lintr
+        verbose: true
       - id: readme-rmd-rendered
       - id: parsable-R
       - id: no-browser-statement
@@ -24,15 +19,15 @@ repos:
       - id: use-tidy-description
       - id: roxygenize
         additional_dependencies:
-        -    cli
-        -    fs
-        -    here
-        -    magrittr
-        -    purrr
-        -    R.cache
-        -    rlang
-        -    rprojroot
-        -    rstudioapi
-        -    withr
-        -    yaml
-        -    r-lib/pkgapi
+          - cli
+          - fs
+          - here
+          - magrittr
+          - purrr
+          - R.cache
+          - rlang
+          - rprojroot
+          - rstudioapi
+          - withr
+          - yaml
+          - r-lib/pkgapi
