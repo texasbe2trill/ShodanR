@@ -288,6 +288,7 @@ p <- ggplot(shodan_count, aes(
 
 ggplotly(p, tooltip = "text") %>%
   layout(
+    autosize = T,
     hoverlabel = list(align = "left"),
     # Create a caption for plot
     annotations = list(
@@ -296,8 +297,7 @@ ggplotly(p, tooltip = "text") %>%
       align. = "right", # Right-align ext
       showarrow = F,
       xref = "paper", yref = "paper", # Keep caption relative to plot
-      font = list(size = 12, color = "gray50"),
-      autosize = T
+      font = list(size = 12, color = "gray50")
     )
   ) %>%
   config(responsive = T)
