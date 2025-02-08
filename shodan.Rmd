@@ -46,6 +46,7 @@ library(knitr)
 library(kableExtra)
 library(lintr)
 library(glue)
+library(randomcoloR)
 ```
 
 ## Shodan API Overview
@@ -252,6 +253,14 @@ shodan_count <- shodan_df_ransomware %>%
   group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
   count(Country)
 
+# Convert Country to a factor for unique color assignment
+shodan_count$Country <- factor(shodan_count$Country)
+
+# Generate a unique color for each country
+num_countries <- length(unique(shodan_count$Country))
+palette_colors <- distinctColorPalette(num_countries) # Ensures unique colors
+
+
 # Make the map interactive
 p <- ggplot(shodan_count, aes(
   x = Longitude, y = Latitude,
@@ -265,6 +274,7 @@ p <- ggplot(shodan_count, aes(
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
+  scale_color_manual(values = palette_colors) +
   theme_map() +
   labs(
     title = "Ransomware Hotspots Across the Globe",
