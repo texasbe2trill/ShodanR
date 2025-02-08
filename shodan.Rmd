@@ -246,7 +246,7 @@ m <- ggplot(shodan_count, aes(x = Longitude, y = Latitude, color = `Country`, si
 
 This data visualization explores the global distribution of ransomware infections, focusing on the geographical hotspots by country and city. Using data from the Shodan API, the map highlights areas with the highest concentrations of ransomware incidents, shedding light on trends and patterns in cyberattacks. By mapping ransomware infections based on real-time data, the visualization provides insights into which regions are most affected and allows for a better understanding of the geographic spread of these cyber threats. The interactive map enables users to zoom in on specific locations and view detailed information on the number of incidents, cities, and countries impacted, offering valuable insights for cybersecurity professionals and researchers.
 
-```{r interactive-map-plot, echo=FALSE}
+```{r interactive-map-plot, echo=FALSE, fig.height=6, fig.width=9, out.width="100%"}
 # Count the number of times values in Country appear
 shodan_count <- shodan_df_ransomware %>%
   group_by(`Country Code`, `City`, `Longitude`, `Latitude`) %>%
