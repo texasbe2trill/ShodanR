@@ -27,7 +27,7 @@ This project delves into analyzing ransomware infections using data extracted fr
 # -   **R version**: `r R.version.string`
 # -   **Required Libraries**: `dplyr`, `ggplot2`, `tidyr`, `httr2`, `stringr`,
 # `ggthemes`, `renv`, `plotly`, `htmltools`, `maps`, `knitr`, `kableExtra`,
-# `jsonlite`, `lintr`, `glue`
+# `jsonlite`, `lintr`, `glue`, `virdis`
 
 
 # Load required libraries
@@ -180,7 +180,7 @@ countries!
 
 According to the Shodan dataset, **{most_common_country}** is the country with the highest number of ransomware infections, with **{max(common_country_count)}** incidents.
 
-There are a total of **{nrow(shodan_df_ransomware)}** ransomware infections worldwide!
+A total of **{nrow(shodan_df_ransomware)}** ransomware infections have been reported worldwide, affecting **{num_countries}** countries!
 
 ### Statistical Analysis
 - The **average** number of ransomware infections per country is **{round(mean(common_country_count), 2)}**
