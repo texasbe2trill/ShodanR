@@ -176,8 +176,7 @@ most_common_city <-
 
 
 # Construct the summary text
-summary_text <- if (length(most_common_country) > 1 ||
-                      length(most_common_city) > 1) {
+summary_text <- if (length(most_common_country) > 1) {
   # If there are multiple countries or cities
   country_text <- paste(most_common_country, collapse = ", ")
   city_text <- paste(most_common_city, collapse = ", ")
@@ -190,8 +189,8 @@ ransomware infections have been reported worldwide, impacting
 ransomware infections are
 **{country_text}**, each reporting **{max(common_country_count)}** incidents.
 
-The cities with the most ransomware infections are **{city_text}**,
-each with **{max(common_city_count)}** incidents.
+The city with the most ransomware infections is **{city_text}**,
+with **{max(common_city_count)}** incidents.
 
 ### Statistical Analysis
 - The **average** number of ransomware infections per country is
