@@ -175,11 +175,6 @@ most_common_city <-
   common_city_names[common_city_count == max(common_city_count)]
 
 
-
-# Initialize summary variables globally
-country_text <- ""
-city_text <- ""
-
 # Construct the summary text
 summary_text <- if (length(most_common_country) > 1 ||
                       length(most_common_city) > 1) {
@@ -318,7 +313,7 @@ p <- ggplot(shodan_count, aes(
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
-  scale_color_viridis(option = "D", discrete = FALSE) + # Viridis color gradient
+  scale_color_gradient2_tableau(palette = "Temperature Diverging") +
   theme_map() +
   labs(
     title = "Ransomware Hotspots Across the Globe",
