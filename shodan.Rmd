@@ -236,15 +236,17 @@ This comprehensive table offers a detailed breakdown of ransomware infection rat
 
 ```{r data-table, echo=FALSE}
 # Table of Ransomware Infections by Country
-kable(common_country_city_count,
+
+kable(
+  common_country_city_count,
+  row.names = FALSE,
   caption = "Distribution of Ransomware Infections by Country and City",
-  col.names = c("Country", "City", "Number of Infections"), format = "html"
+  col.names = c("Country", "City", "Number of Infections"),
+  format = "html"
 ) %>%
-  kable_styling(bootstrap_options = c(
-    "striped", "hover", "condensed",
-    "responsive"
-  )) %>%
-  scroll_box(width = "100%", height = "500px") # Add a scroll box
+  kable_styling(bootstrap_options =
+                  c("striped", "hover", "condensed", "responsive")) %>%
+  scroll_box(width = "100%", height = "500px")
 ```
 
 # Data Visualization of Ransomware Infections
