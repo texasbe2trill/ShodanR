@@ -310,7 +310,7 @@ p <- ggplot(shodan_count, aes(
     "<br>", "Number of Infections:", n
   )
 )) +
-  borders("world", colour = "gray50", fill = "gray50") +
+  annotation_borders("world", colour = "gray50", fill = "gray50") +
   # Remove Antarctica
   coord_cartesian(xlim = c(-180, 180), ylim = c(-60, 90)) +
   geom_point() +
